@@ -29,9 +29,10 @@ async function initialDbContent() {
     const insertOperations = await operationCollection.insertMany([
         {type:'addition', cost: 100},
         {type:'subtraction', cost: 200},
-        {type:'division', cost: 300},
-        {type:'square_root', cost: 400},
-        {type:'random_string', cost: 500},
+        {type:'multiplication', cost: 300},
+        {type:'division', cost: 400},
+        {type:'square_root', cost: 500},
+        {type:'random_string', cost: 600},
     ]);
 
     console.log(insertOperations);

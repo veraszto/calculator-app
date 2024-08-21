@@ -1,7 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const {authenticate, client} = require('./db.js');
+const {authenticate, client, getRecords} = require('./db.js');
+const {performOperation} = require('./operation.js')
 
 const app = express();
 
@@ -25,27 +26,67 @@ app.use(session({
     }*/
 }));
 
+function restricted(req, res, next) {
+    if (req.session.username) {
+        next()
+    } else {
+        res.json({isAuthenticated: false});
+    }
+}
+
+app.put('/operation', restricted, function(req, res) {
+    performOperation(req.body.operation, req.session.userid).then((result)=>{
+        if (result.error) {
+            return res.status(result.code).json({error: result.error})
+        }
+        res.json(result);
+    }).catch((error)=>{
+        console.error(error);
+        res.status(500).json({})
+    });
+})
+
+app.post('/records', restricted, function(req, res) {
+    console.log('/records', req.session.userid);
+    getRecords(req.session.userid).then((result) => {
+        res.json(result);
+    }).catch((error)=>{
+        res.status(500).json([]);
+        console.error(error);
+    })
+})
 
 app.get('/is-authenticated', function(req, res) {
-    console.log("is-authenticated", req.session.username);
+    console.log("/is-authenticated", req.session.username);
     if (req.session.username) {
-        res.json({isAuthenticated: true});
+        res.json({isAuthenticated: true, username:req.session.username, userid: req.session.userid});
     } else {
         res.json({isAuthenticated: false});
     }
 });
 
+app.get('/logout', function(req, res) {
+    req.session.destroy(() => {
+        res.json({sessionDestroyed: true});
+    })    
+});
+
 app.post('/login', function(req, res, next) {
-    console.log("req.body", req.body);
+    console.log("/login", req.body);
     authenticate(req.body.username, req.body.password).then((response)=>{
-        if (response.length) {
+        console.log("/login", response);
+        if (response) {
             req.session.regenerate(function (){
-                req.session.username = req.body.username;
-                res.json({success: true, userPack: response});
+                req.session.username = response.username;
+                req.session.userid = response._id;
+                res.json({isAuthenticated: true, username: response.username, userid: response._id});
             })
         } else {
-            res.json({success: false});
+            res.json({isAuthenticated: false});
         }
+    }).catch((error) => {
+        console.error('/login', error);
+        res.status(500).json({isAuthenticated: false})
     });
 })
 

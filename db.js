@@ -9,26 +9,32 @@ const client = new MongoClient(uri, {
   }
 });
 
+function getOperation(type) {
+    const operationCollection = client.db('calculator').collection('operation');
+    return operationCollection.findOne({type}).then((operationFound)=>operationFound);
+}
 
 function authenticate(username, password) {
     const userCollection = client.db('calculator').collection('user');
     return userCollection.findOne({username, password}).then((user)=>{
         if (!user) {
-            return [];
+            return null;
         }
-        return getRecords(user._id).then(records => records);
-    }).catch((error)=>{
-        console.log(error);
-        return error;
+        return user;
     });
 }
 
-function getRecords(userId, skip) {
+function insertRecord(record) {
+    const recordCollection = client.db('calculator').collection('record');
+    return recordCollection.insertOne(record);
+}
+
+function getRecords(userId, skip = 0, limit = 10) {
     const recordCollection = client.db('calculator').collection('record');
     return recordCollection.aggregate([
         {
             $match: {
-                user_id: userId
+                user_id: new ObjectId(userId)
             }
         },
         {
@@ -49,18 +55,22 @@ function getRecords(userId, skip) {
         },
         {
             $sort: {
-                _id: '-1'
+                _id: -1
             }
         },
         {
-            $limit: 10 
+            $limit: limit
         },
         {
-            $skip: skip || 0
+            $skip: skip
         }
     ]).toArray();
 }
 
 exports.client = client;
+exports.ObjectId = ObjectId;
 exports.authenticate = authenticate;
+exports.getRecords = getRecords;
+exports.getOperation = getOperation;
+exports.insertRecord = insertRecord;
 
