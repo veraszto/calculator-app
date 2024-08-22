@@ -1,4 +1,4 @@
-### Calculator APP
+## Calculator APP
 
 This is the backend application of its UI [counterpart](https://github.com/veraszto/calculator-ui)
 
@@ -14,4 +14,4 @@ Run the application
 
 `CALCULATOR_APP_MONGODB_URI="mongodb+srv://<user>:<pass>@mycluster.kcj4x.mongodb.net/?retryWrites=true&w=majority&appName=MyCluster" npm run start`
 
-
+### Thanks!
