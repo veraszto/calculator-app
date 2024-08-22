@@ -14,17 +14,19 @@ app.use(express.json());
 
 app.use(cors({credentials:true, origin: true}));
 
-app.use(session({
+const sessionConfig = {
     secret: process.env.SECRET || 'Hey there',
     resave: false,
     saveUninitialized: false,
-    /*
-    cookie: {
-        sameSite: false,
-        secure: false,
-        httpOnly: true
-    }*/
-}));
+    cookie: {}
+}
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1);
+    sessionConfig.cookie.secure = true;
+}
+
+app.use(session(sessionConfig));
 
 function restricted(req, res, next) {
     if (req.session.username) {
