@@ -21,7 +21,7 @@ async function initialDbContent() {
     console.log(deleted);
 
     const insertUsers = await userCollection.insertMany([
-        {username: 'garbini@gmail.com', 
+        {username: 'danilo@me.com', 
             password: 'WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U=', status: 'active'},
         {username: 'ntd@ntd.com', 
             password: 'WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U=', status: 'active'},
