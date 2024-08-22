@@ -2,29 +2,31 @@ const { getOperation, getRecords, insertRecord, ObjectId } = require('./db.js');
 
 const StringGeneratorUrl = "https://www.random.org/strings/?num=1&len=8&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain&rnd=new"
 
-const operations = {
-    addition:/\d+((\.|,)\d+)?\s*\+\s*\d+((\.|,)\d+)?$/,
-    subtraction:/\d+((\.|,)\d+)?\s*\-\s*\d+((\.|,)\d+)?$/,
-    multiplication:/\d+((\.|,)\d+)?\s*\*\s*\d+((\.|,)\d+)?$/,
-    division:/\d+((\.|,)\d+)?\s*\/\s*\d+((\.|,)\d+)?$/,
-    square_root:/sqroot\d+((\.|,)\d+)?$/,
+const Operations = {
+    addition: /\d+((\.|,)\d+)?\s*\+\s*\d+((\.|,)\d+)?$/,
+    subtraction: /\d+((\.|,)\d+)?\s*\-\s*\d+((\.|,)\d+)?$/,
+    multiplication: /\d+((\.|,)\d+)?\s*\*\s*\d+((\.|,)\d+)?$/,
+    division: /\d+((\.|,)\d+)?\s*\/\s*\d+((\.|,)\d+)?$/,
+    square_root: /sqroot\d+((\.|,)\d+)?$/,
     random_string: /random_string/
 }
 
+const MatchNumber =  /\d+((\.|,)\d+)?/g;
+
 async function performOperation(string, userId) {
-    let which = null;
-    for(const [name, regex] of Object.entries(operations)) {
+    let selectedOperation = null;
+    for(const [name, regex] of Object.entries(Operations)) {
         if (regex.test(string)) {
-            which = name;
+            selectedOperation = name;
             break;
         }
     }
-    if (which === null) {
-        return {error: 'Have not fit to any of the operations', code: 401};
+    if (selectedOperation === null) {
+        return {error: 'Have not fit to any of the operations', code: 400};
     }
 
     let randomString;
-    if (which === 'random_string') {
+    if (selectedOperation === 'random_string') {
         try{
             randomString = await fetch(StringGeneratorUrl).then(res => res.text());
             console.log('/operation', randomString.toString());
@@ -33,8 +35,8 @@ async function performOperation(string, userId) {
         }
     }
 
-    console.log('/operation', which);
-    return getOperation(which).then((operation)=>{
+    console.log('/operation', selectedOperation);
+    return getOperation(selectedOperation).then((operation)=>{
         console.log('/operation', operation)
         return getRecords(userId, 0, 1).then((latestRecord)=>{
             console.log('/operation', latestRecord)
@@ -57,7 +59,64 @@ async function performOperation(string, userId) {
                     }
                 )
             }
-            return latestRecord;
+            if (selectedOperation === 'square_root') {
+                let result;
+                try {
+                    let number = string.match(MatchNumber)[0];
+                    number = parseFloat(number);
+                    result = Math.sqrt(number);
+                } catch(error){
+                    console.error(error);
+                    return {error: `Could not perform square root from ${string} `, code: 400};
+                }
+                return insertRecord(
+                    {
+                        user_balance: new_balance,
+                        date: new Date(),
+                        operation_id: _id,
+                        user_id: new ObjectId(userId),
+                        operation_response: result,
+                        queried: string
+                    }
+                )
+            }
+
+            let result;
+            //Since a mathematic expression has been asserted more above, 
+            //maybe I could have just used eval()
+            try {
+                const numbers = string.match(MatchNumber);
+                console.log('/operation', numbers);
+                numbers[0] = parseFloat(numbers[0]);
+                numbers[1] = parseFloat(numbers[1]);
+                switch(selectedOperation) {
+                    case 'multiplication':
+                        result = numbers[0] * numbers[1]
+                    break;
+                    case 'addition':
+                        result = numbers[0] + numbers[1]
+                    break;
+                    case 'subtraction':
+                        result = numbers[0] - numbers[1]
+                    break;
+                    case 'division':
+                        result = numbers[0] / numbers[1]
+                    break;
+                }
+            } catch(error) {
+                console.error(error);
+                return {error: `Could not perform ${string} `, code: 400};
+            }
+            return insertRecord(
+                {
+                    user_balance: new_balance,
+                    date: new Date(),
+                    operation_id: _id,
+                    user_id: new ObjectId(userId),
+                    operation_response: result,
+                    queried: string
+                }
+            )
         })
     })
 

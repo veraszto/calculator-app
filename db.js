@@ -1,7 +1,11 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = "mongodb+srv://garbini:ifnqJzvKs4hM2Br7@mycluster.kcj4x.mongodb.net/?retryWrites=true&w=majority&appName=MyCluster";
+const {createHash} = require("node:crypto");
 
-const client = new MongoClient(uri, {
+const uri = "";
+
+const Uri = process.env.CALCULATOR_APP_MONGODB_URI
+
+const client = new MongoClient(Uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -16,7 +20,9 @@ function getOperation(type) {
 
 function authenticate(username, password) {
     const userCollection = client.db('calculator').collection('user');
-    return userCollection.findOne({username, password}).then((user)=>{
+    return userCollection.findOne({
+        username, password: createHash('sha256').update(password).digest('base64')
+    }).then((user)=>{
         if (!user) {
             return null;
         }

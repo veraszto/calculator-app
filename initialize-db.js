@@ -21,7 +21,11 @@ async function initialDbContent() {
     console.log(deleted);
 
     const insertUsers = await userCollection.insertMany([
-        {username: 'garbini@gmail.com', password: '12345', status: 'active'}
+        {username: 'garbini@gmail.com', 
+            password: 'WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U=', status: 'active'},
+        {username: 'ntd@ntd.com', 
+            password: 'WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U=', status: 'active'},
+
     ]);
 
     console.log(insertUsers);
@@ -37,9 +41,11 @@ async function initialDbContent() {
 
     console.log(insertOperations);
 
-    const insertRecords = await recordCollection.insertMany([
-        {user_id: insertUsers.insertedIds[0], user_balance: 50000, date: new Date()}
-    ]);
+    const records = Object.values(insertUsers.insertedIds).map(id =>({
+        user_id: id, user_balance: 50000, date: new Date()
+    }))
+
+    const insertRecords = await recordCollection.insertMany(records);
 
     console.log(insertRecords);
 }
