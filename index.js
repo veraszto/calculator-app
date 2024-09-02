@@ -36,6 +36,10 @@ function restricted(req, res, next) {
     }
 }
 
+app.get('/', function (req, res) {
+    res.json({running: true});
+});
+
 app.put('/operation', restricted, function(req, res) {
     performOperation(req.body.operation, req.session.userid).then((result)=>{
         if (result.error) {

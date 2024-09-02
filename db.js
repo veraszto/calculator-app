@@ -1,8 +1,6 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const {createHash} = require("node:crypto");
 
-const uri = "";
-
 const Uri = process.env.CALCULATOR_APP_MONGODB_URI
 
 const client = new MongoClient(Uri, {
