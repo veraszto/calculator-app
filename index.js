@@ -18,7 +18,7 @@ const sessionConfig = {
     secret: process.env.SECRET || 'Hey there',
     resave: false,
     saveUninitialized: false,
-    cookie: {}
+    cookie: {sameSite: 'None'}
 }
 
 if (app.get('env') === 'production') {
