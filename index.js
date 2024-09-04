@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const {authenticate, client, getRecords} = require('./db.js');
+const {authenticate, client, getRecords, softDelete} = require('./db.js');
 const {performOperation} = require('./operation.js')
 
 const app = express();
@@ -18,12 +18,13 @@ const sessionConfig = {
     secret: process.env.SECRET || 'Hey there',
     resave: false,
     saveUninitialized: false,
-    cookie: {sameSite: 'None'}
+    cookie: {}
 }
 
 if (app.get('env') === 'production') {
     app.set('trust proxy', 1);
     sessionConfig.cookie.secure = true;
+    sessionConfig.cookie.sameSite = 'None';
 }
 
 app.use(session(sessionConfig));
@@ -38,6 +39,17 @@ function restricted(req, res, next) {
 
 app.get('/', function (req, res) {
     res.json({running: true});
+});
+
+app.patch('/soft-delete', restricted, function(req, res) {
+    console.log('/soft-delete', req.body.recordId);
+    softDelete(req.body.recordId).then((result)=>{
+        console.log('/soft-delete', result);
+        res.json(result);
+    }).catch((error)=>{
+        console.error(error);
+        res.status(500).json({})
+    })
 });
 
 app.put('/operation', restricted, function(req, res) {

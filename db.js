@@ -28,6 +28,16 @@ function authenticate(username, password) {
     });
 }
 
+function softDelete(recordId) {
+    const recordCollection = client.db('calculator').collection('record');
+    return recordCollection.updateOne(
+        {_id: new ObjectId(recordId)},
+        {
+            $set: {deleted: true}
+        }
+    )
+}
+
 function insertRecord(record) {
     const recordCollection = client.db('calculator').collection('record');
     return recordCollection.insertOne(record);
@@ -38,7 +48,8 @@ function getRecords(userId, skip = 0, limit = 10) {
     return recordCollection.aggregate([
         {
             $match: {
-                user_id: new ObjectId(userId)
+                user_id: new ObjectId(userId),
+                deleted: { $ne: true }
             }
         },
         {
@@ -77,4 +88,5 @@ exports.authenticate = authenticate;
 exports.getRecords = getRecords;
 exports.getOperation = getOperation;
 exports.insertRecord = insertRecord;
+exports.softDelete = softDelete;
 

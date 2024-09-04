@@ -7,11 +7,11 @@ const Operations = {
     subtraction: /\d+((\.|,)\d+)?\s*\-\s*\d+((\.|,)\d+)?$/,
     multiplication: /\d+((\.|,)\d+)?\s*\*\s*\d+((\.|,)\d+)?$/,
     division: /\d+((\.|,)\d+)?\s*\/\s*\d+((\.|,)\d+)?$/,
-    square_root: /sqroot\d+((\.|,)\d+)?$/,
+    square_root: /sqroot-?\d+((\.|,)\d+)?$/,
     random_string: /random_string/
 }
 
-const MatchNumber =  /\d+((\.|,)\d+)?/g;
+const MatchNumber =  /-?\d+((\.|,)\d+)?/g;
 
 async function performOperation(string, userId) {
     let selectedOperation = null;
@@ -22,7 +22,7 @@ async function performOperation(string, userId) {
         }
     }
     if (selectedOperation === null) {
-        return {error: 'Have not fit to any of the operations', code: 400};
+        return {error: `${string} has not fit to any of the operations`, code: 400};
     }
 
     let randomString;
@@ -61,13 +61,17 @@ async function performOperation(string, userId) {
             }
             if (selectedOperation === 'square_root') {
                 let result;
+                const errorResponse = {error: `Could not perform square root from ${string} `, code: 400};
                 try {
                     let number = string.match(MatchNumber)[0];
                     number = parseFloat(number);
                     result = Math.sqrt(number);
+                    if (isNaN(result)) {
+                        return errorResponse;
+                    }
                 } catch(error){
                     console.error(error);
-                    return {error: `Could not perform square root from ${string} `, code: 400};
+                    return errorResponse;
                 }
                 return insertRecord(
                     {
@@ -100,6 +104,9 @@ async function performOperation(string, userId) {
                         result = numbers[0] - numbers[1]
                     break;
                     case 'division':
+                        if (numbers[1] === 0) {
+                            return {error: `Could not perform ${string}, division by zero`, code: 400};
+                        }
                         result = numbers[0] / numbers[1]
                     break;
                 }
