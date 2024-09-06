@@ -66,7 +66,11 @@ app.put('/operation', restricted, function(req, res) {
 
 app.post('/records', restricted, function(req, res) {
     console.log('/records', req.session.userid);
-    getRecords(req.session.userid).then((result) => {
+    let skip = 0;
+    if (req.body.skip) {
+        skip = req.body.skip;
+    }
+    getRecords(req.session.userid, skip).then((result) => {
         res.json(result);
     }).catch((error)=>{
         res.status(500).json([]);

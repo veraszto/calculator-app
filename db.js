@@ -44,42 +44,48 @@ function insertRecord(record) {
 }
 
 function getRecords(userId, skip = 0, limit = 10) {
+    const match = {
+        user_id: new ObjectId(userId),
+        deleted: { $ne: true },
+    }
     const recordCollection = client.db('calculator').collection('record');
-    return recordCollection.aggregate([
-        {
-            $match: {
-                user_id: new ObjectId(userId),
-                deleted: { $ne: true }
+    return recordCollection.find({...match, operation_response: {$exists: true}}).count().then((count)=>{
+        return recordCollection.aggregate([
+            {
+                $match: match
+            },
+            {
+                $lookup: {
+                    from: 'user',
+                    localField:'user_id',
+                    foreignField:'_id',
+                    as: 'user'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'operation',
+                    localField: 'operation_id',
+                    foreignField: '_id',
+                    as: 'operation'
+                }
+            },
+            {
+                $sort: {
+                    _id: -1
+                }
+            },
+            {
+                $skip: skip
+            },
+            {
+                $limit: limit
             }
-        },
-        {
-            $lookup: {
-                from: 'user',
-                localField:'user_id',
-                foreignField:'_id',
-                as: 'user'
-            }
-        },
-        {
-            $lookup: {
-                from: 'operation',
-                localField: 'operation_id',
-                foreignField: '_id',
-                as: 'operation'
-            }
-        },
-        {
-            $sort: {
-                _id: -1
-            }
-        },
-        {
-            $limit: limit
-        },
-        {
-            $skip: skip
-        }
-    ]).toArray();
+        ]).toArray().then((records) => {
+            return {totalRecords: count, skip, records}
+        });
+    })
+    
 }
 
 exports.client = client;

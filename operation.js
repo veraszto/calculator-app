@@ -39,9 +39,9 @@ async function performOperation(string, userId) {
     return getOperation(selectedOperation).then((operation)=>{
         console.log('/operation', operation)
         return getRecords(userId, 0, 1).then((latestRecord)=>{
-            console.log('/operation', latestRecord)
+            console.log('/operation', latestRecord.records)
             const { cost, _id } = operation;
-            const { user_balance } = latestRecord[0];
+            const { user_balance } = latestRecord.records[0];
             console.log('/operation', cost, user_balance);
             const new_balance = user_balance - cost;
             if (new_balance < 0) {
