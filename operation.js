@@ -25,20 +25,12 @@ async function performOperation(string, userId) {
         return {error: `${string} has not fit to any of the operations`, code: 400};
     }
 
-    let randomString;
-    if (selectedOperation === 'random_string') {
-        try{
-            randomString = await fetch(StringGeneratorUrl).then(res => res.text());
-            console.log('/operation', randomString.toString());
-        } catch(error) {
-            return {error: 'Could not fetch from random.org', code: 401};
-        }
-    }
+    
 
     console.log('/operation', selectedOperation);
     return getOperation(selectedOperation).then((operation)=>{
         console.log('/operation', operation)
-        return getRecords(userId, 0, 1).then((latestRecord)=>{
+        return getRecords(userId, 0, 1).then(async(latestRecord)=>{
             console.log('/operation', latestRecord.records)
             const { cost, _id } = operation;
             const { user_balance } = latestRecord.records[0];
@@ -47,6 +39,17 @@ async function performOperation(string, userId) {
             if (new_balance < 0) {
                 return {error: 'Not enough balance', code: 401};
             }
+
+            let randomString;
+            if (selectedOperation === 'random_string') {
+                try{
+                    randomString = await fetch(StringGeneratorUrl).then(res => res.text());
+                    console.log('/operation', randomString.toString());
+                } catch(error) {
+                    return {error: 'Could not fetch from random.org', code: 401};
+                }
+            }
+
             if (randomString) {
                 return insertRecord(
                     {
@@ -59,6 +62,7 @@ async function performOperation(string, userId) {
                     }
                 )
             }
+
             if (selectedOperation === 'square_root') {
                 let result;
                 const errorResponse = {error: `Could not perform square root from ${string} `, code: 400};
