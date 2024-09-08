@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "lint:fix": "eslint --fix",
-    "start": "node index.js"
+    "start": "node index.js",
+    "prettier:lint:fix": "prettier --write *.js *.mjs; eslint --fix *.js *.mjs"
   },
   "author": "",
   "license": "ISC",
@@ -18,9 +18,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@stylistic/eslint-plugin-jsx": "^2.6.4",
     "eslint": "^9.9.0",
+    "eslint-plugin-jest": "^28.8.3",
     "globals": "^15.9.0",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "prettier": "3.3.3"
   }
 }
