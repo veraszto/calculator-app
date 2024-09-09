@@ -47,7 +47,7 @@ app.post("/records", restricted, records);
 
 app.get("/is-authenticated", isAuthenticated);
 
-app.get("/logout", logout);
+app.get("/logout", restricted, logout);
 
 app.post("/login", login);
 

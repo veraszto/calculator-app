@@ -6,11 +6,11 @@ Run `npm install`
 
 Run a MongoDB instance wherever you like, MongoDB Atlas, Docker and so on
 
-In case the Docker way is chosen, run `run-docker-mongodb.sh` to have a MongoDB instance running
+To use Docker, run `run-docker-mongodb.sh` to have a MongoDB instance running
 
 Initialize the DB using the appropriate option:
 
-My actual deployment with public acess using this application of MongoDB is on Atlas and I connect to it using the URI below
+My actual deployment with public access using this application with MongoDB is on Atlas and I connect to it using the URI below
 
 `CALCULATOR_APP_MONGODB_URI="mongodb+srv://<user>:<pass>@mycluster.kcj4x.mongodb.net/?retryWrites=true&w=majority&appName=MyCluster" node initialize-db.js`
 
